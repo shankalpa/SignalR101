@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR Chat</title>
+    <script src="scripts/jquery-1.6.4.min.js"></script>
+    <script src="scripts/jquery.signalR-2.2.1.min.js"></script>
+    <script src="signalr/hubs"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var _name = window.prompt("Please Enter your name");
+            $("#spnName").text(_name);
+            $("#textMessage").val('');
+
+            //Get proxy instance using the auto-generated proxy lass
+            var chatProxy = $.connection.chatHub;
+
+            //Bind the btnClick event when connection to the hub is started
+            $.connection.hub.start().done(function () {
+                $("#btnSend").click(function () {
+                    //Send message to the hub using the proxy instance
+                    chatProxy.server.broadCastMessage($("#spnName").text(), $("#textMessage").val());
+                    $("textMessage").val("").focus();
+                })
+            });
+
+            //Callback function which the hub will call when it has finished processing
+            // is attached to the proxy
+            chatProxy.client.receiveMessage = function(msgFrom, msg){
+                $("#divChat").append("<li><strong>"+msgFrom+"</strong>:&nbsp;&nbsp"+msg+"</li>")
+            }
+        });
+    </script>
+</head>
+<body>
+    <div style="width:50%; border:solid 1px Red; height:40px">
+        <h3 style="margin: 10px 0px 0px 10px">
+            <span id="spnName"></span>
+        </h3>
+    </div>
+    <div style="width:50%; border:solid 1px Red; height:100px">
+        <div style="height:70%" id="divChat"></div>
+        <div style="border: dashed 1px Black">
+            <div style="float:left;width:70%; padding:4px">
+                <input type="text" style="width:100%" id="textMessage" />
+            </div>
+            <div style="float:right;width:19%; padding:4px">
+                <input type="button" id="btnSend" value="Send Message" style="width:45px" />
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
